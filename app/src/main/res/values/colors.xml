@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">@color/teal_new_200</color>
+    <color name="colorPrimaryDark">@color/teal_new_200</color>
+    <color name="colorAccent">@color/colorOrange</color>
+
+    <color name="teal_new_200">#018369</color>
+    <color name="teal_new_700">#009688</color>
+    <color name="colorOrange">#E88112</color>
+
+</resources>
