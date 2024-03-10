@@ -1,36 +1,31 @@
 package com.example.taskproject.activity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskproject.R;
 import com.example.taskproject.adapter.UserListAdapter;
-import com.example.taskproject.api.RestApI;
-import com.example.taskproject.database.LocalUserDatabase;
 import com.example.taskproject.databinding.ActivityMainBinding;
 import com.example.taskproject.model.User;
-import com.example.taskproject.model.UserResponse;
 import com.example.taskproject.utils.NetworkCheckActivity;
+import com.example.taskproject.viewmodel.UserViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private UserListAdapter adapter;
     private int currentPage = 1;
     private int start = 0;
-    private int limit = 6;
-    private boolean isLoading = false;
+    private UserViewModel viewModel;
+    private boolean isLoadingLoadMore = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,73 +40,73 @@ public class MainActivity extends AppCompatActivity {
         adapter = new UserListAdapter(MainActivity.this, new ArrayList<>());
         binding.userRecycler.setAdapter(adapter);
 
+        setLoadMoreRecyclerView();
+
+        viewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        viewModel.init(this);
+
+        getUsersList(currentPage, start);
+
+        viewModel.getUserLiveData().observe(this, this::setUserAdapter);
+
+    }
+
+    private void loadMoreUsers() {
+        isLoadingLoadMore = true;
+        currentPage++;
+        start++;
+        int limit = 6;
+        start = start + limit;
+        getUsersList(currentPage, start);
+    }
+
+    private void getUsersList(int currentPage, int start) {
+        binding.progressCircular.setVisibility(View.VISIBLE);
+        if (NetworkCheckActivity.isNetworkConnected(this)) {
+            viewModel.getUserFromServer(currentPage);
+        } else {
+            viewModel.getUserFromLocalDB(start, 6);
+        }
+    }
+
+    private void setUserAdapter(List<User> userList) {
+        binding.progressCircular.setVisibility(View.GONE);
+        adapter.addUsers(userList);
+        isLoadingLoadMore = false;
+    }
+
+    private boolean isLoading() {
+        return isLoadingLoadMore;
+    }
+
+    private boolean isLastPage() {
+        return adapter.getItemCount() >= 12;
+    }
+
+    private int getPageSize() {
+        return 6;
+    }
+
+    private void setLoadMoreRecyclerView() {
         binding.userRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                assert layoutManager != null;
                 int visibleItemCount = layoutManager.getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                if (!isLoading && visibleItemCount + firstVisibleItemPosition >= totalItemCount) {
-                    // Load more data when reaching the end
-                    loadMoreUsers();
+                if (!isLoading() && !isLastPage()) {
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                            && firstVisibleItemPosition >= 0
+                            && totalItemCount >= getPageSize()) {
+                        loadMoreUsers();
+                    }
                 }
             }
         });
-
-        if (NetworkCheckActivity.isNetworkConnected(this)) {
-            getUserFromServer(currentPage);
-        } else {
-            getUserFromLocal(start, limit);
-        }
     }
-
-    private void getUserFromLocal(int start, int limit) {
-        setUserAdapter(LocalUserDatabase.getInstance(this).userDao().getAllUser(start, limit));
-    }
-
-    private void loadMoreUsers() {
-        currentPage++;
-        start++;
-        start = start + limit;
-        if (NetworkCheckActivity.isNetworkConnected(this)) {
-            getUserFromServer(currentPage);
-        } else {
-            getUserFromLocal(start, limit);
-        }
-    }
-
-    private void getUserFromServer(int page) {
-        binding.progressCircular.setActivated(true);
-        binding.progressCircular.setVisibility(View.VISIBLE);
-        Call<UserResponse> call = RestApI.getInstance().getRetrofitApi().getUsers(page);
-        call.enqueue(new Callback<UserResponse>() {
-            @Override
-            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                if (response.body() != null) {
-                    UserResponse res = response.body();
-                    List<User> users = res.getData();
-                    LocalUserDatabase.getInstance(MainActivity.this).userDao().insertAllUser(users);
-                    setUserAdapter(users);
-                }
-                binding.progressCircular.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: " + t.getMessage());
-                binding.progressCircular.setVisibility(View.GONE);
-            }
-        });
-
-    }
-
-    private void setUserAdapter(List<User> userList) {
-        adapter.addUsers(userList);
-    }
-
-    private static final String TAG = "MainActivity";
 
 }

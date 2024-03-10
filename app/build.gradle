@@ -28,7 +28,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding true;
+        viewBinding true
     }
 }
 
@@ -51,7 +51,7 @@ dependencies {
 
 
     // retrofit, gson
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
@@ -61,5 +61,15 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
     // circle image view
     implementation 'de.hdodenhof:circleimageview:3.0.0'
+
+//viewmodel
+    def view_model_version = "2.3.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$view_model_version"
+
+// LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata:$view_model_version"
+
+// Repository
+    implementation "androidx.lifecycle:lifecycle-common-java8:$view_model_version"
 
 }

@@ -15,5 +15,6 @@ public interface UserDao {
     void insertAllUser(List<User> userList);
 
     @Query("Select * from user limit :start,:limit")
-    List<User> getAllUser(int start, int limit);
+    List<User> getUsers(int start, int limit);
+
 }
