@@ -6,6 +6,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
 
         binding.userRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         binding.userRecycler.setHasFixedSize(true);
+        binding.userRecycler.addItemDecoration(new DividerItemDecoration(binding.userRecycler.getContext()
+                , LinearLayoutManager.VERTICAL));
+
         adapter = new UserListAdapter(MainActivity.this, new ArrayList<>());
         binding.userRecycler.setAdapter(adapter);
 
