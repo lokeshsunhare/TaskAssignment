@@ -5,6 +5,7 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/colorPrimary"
     android:minHeight="?attr/actionBarSize"
     app:elevation="10dp">
 
@@ -60,6 +61,7 @@
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:text="dsafdsfaf"
+                android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
